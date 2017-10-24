@@ -209,6 +209,8 @@ func (tx *Txn) CommitMutations(ctx context.Context, commitTs uint64, writeLock b
 }
 
 func (tx *Txn) CommitMutationsMemory(ctx context.Context, commitTs uint64) error {
+	tx.Lock()
+	defer tx.Unlock()
 	return tx.commitMutationsMemory(ctx, commitTs)
 }
 

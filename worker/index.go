@@ -42,9 +42,7 @@ func (n *node) rebuildOrDelIndex(ctx context.Context, attr string, rebuild bool,
 	// it would use by lhmap
 	txn.DeleteIndex(ctx, attr)
 	if rebuild {
-		if err := txn.RebuildIndex(ctx, attr); err != nil {
-			return err
-		}
+		txn.RebuildIndex(ctx, attr)
 	}
 	return nil
 }
