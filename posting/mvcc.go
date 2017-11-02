@@ -40,7 +40,7 @@ var (
 func init() {
 	txns = new(transactions)
 	txns.m = make(map[uint64]*Txn)
-	txnMarks = &x.WaterMark{Name: "Synced watermark"}
+	txnMarks = &x.WaterMark{Name: "Transaction watermark"}
 	txnMarks.Init()
 }
 
@@ -66,9 +66,6 @@ type Txn struct {
 	deltas []delta
 	// Stores list of proposal indexes belonging to the transaction, the watermark would
 	// be marked as done only when it's committed.
-	// TODO: Check if some txn is stuck without commit/abort for long time.
-	// Long running transaction can cause memory issues, probably persist prewrites during
-	// lru eviction.
 	Indices []uint64
 }
 
@@ -321,6 +318,8 @@ func ReadPostingList(key []byte, it *badger.Iterator) (*List, error) {
 			var pl protos.PostingList
 			x.Check(pl.Unmarshal(val))
 			for _, mpost := range pl.Postings {
+				// commitTs, startTs are meant to be only in memory, not
+				// stored on disk.
 				mpost.CommitTs = item.Version()
 				l.mlayer = append(l.mlayer, mpost)
 			}

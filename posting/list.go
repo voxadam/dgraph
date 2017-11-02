@@ -383,10 +383,14 @@ func (l *List) addMutation(ctx context.Context, txn *Txn, t *protos.DirectedEdge
 		}
 	}
 	tidx := sort.Search(len(l.activeTxns), func(idx int) bool {
-		return l.activeTxns[idx] == txn.StartTs
+		return l.activeTxns[idx] >= txn.StartTs
 	})
 	if tidx >= len(l.activeTxns) {
 		l.activeTxns = append(l.activeTxns, txn.StartTs)
+	} else if l.activeTxns[tidx] != txn.StartTs {
+		l.activeTxns = append(l.activeTxns, 0)
+		copy(l.activeTxns[tidx+1:], l.activeTxns[tidx:])
+		l.activeTxns[tidx] = txn.StartTs
 	}
 	txn.AddDelta(l.key, mpost)
 	return hasMutated, nil
@@ -441,9 +445,9 @@ func (l *List) commitMutation(ctx context.Context, startTs, commitTs uint64) (bo
 
 	l.AssertLock()
 	tidx := sort.Search(len(l.activeTxns), func(idx int) bool {
-		return l.activeTxns[idx] == startTs
+		return l.activeTxns[idx] >= startTs
 	})
-	if tidx < len(l.activeTxns) {
+	if tidx < len(l.activeTxns) && l.activeTxns[tidx] == startTs {
 		copy(l.activeTxns[tidx:], l.activeTxns[tidx+1:])
 		l.activeTxns = l.activeTxns[:len(l.activeTxns)-1]
 	} else {

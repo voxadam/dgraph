@@ -620,13 +620,22 @@ START:
 		}
 		posting.Oracle().ProcessOracleDelta(oracleDelta)
 		if !g.Node.AmLeader() {
+			// In the event where there in no leader for a group, commit/abort won't get proposed.
+			// System would still be logically correct.
+			// TODO: Oracle can check in background and propose to fix the issue.
 			continue
 		}
 		for startTs, commitTs := range oracleDelta.Commits {
+			if posting.Txns().Get(startTs) == nil {
+				continue
+			}
 			tctx := &protos.TxnContext{StartTs: startTs, CommitTs: commitTs}
 			go g.Node.ProposeAndWait(context.Background(), &protos.Proposal{TxnContext: tctx})
 		}
 		for _, startTs := range oracleDelta.Aborts {
+			if posting.Txns().Get(startTs) == nil {
+				continue
+			}
 			tctx := &protos.TxnContext{StartTs: startTs}
 			go g.Node.ProposeAndWait(context.Background(), &protos.Proposal{TxnContext: tctx})
 		}
