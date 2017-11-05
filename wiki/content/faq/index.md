@@ -58,6 +58,8 @@ Dgraph will aim to support [Gremlin](https://github.com/tinkerpop/gremlin/wiki) 
 ### Is Dgraph going to support Cypher?
 If there is a demand for it, Dgraph could support [Cypher](https://neo4j.com/developer/cypher-query-language/). It would most likely be after v1.0.
 
+### Does Dgraph support transactions?
+
 ### Can Dgraph support X?
 Please see Dgraph [product roadmap](https://github.com/dgraph-io/dgraph/issues/1) of what we're planning to support for v1.0. If `request X` is not part of it, please feel free to start a discussion at [discuss.dgraph.io](https://discuss.dgraph.io), or file a [Github Issue](https://github.com/dgraph-io/dgraph/issues).
 
